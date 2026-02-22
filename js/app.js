@@ -18,14 +18,11 @@ const STATE = {
   pomo: { sessions: 0, minutes: 0 }
 };
 
-let API_KEY = '';
-
 function loadState() {
   try {
     const d = localStorage.getItem('ks_state');
     if (d) Object.assign(STATE, JSON.parse(d));
   } catch (e) { console.warn('loadState error', e); }
-  API_KEY = localStorage.getItem('ks_key') || '';
 
   // Streak check
   const today = todayStr();
@@ -72,7 +69,6 @@ function updateUI() {
   document.getElementById('h-streak').textContent  = STATE.streak;
   document.getElementById('h-sess').textContent    = STATE.sessions;
 
-  updateApiStatus();
 }
 
 function addXP(n) {
@@ -82,21 +78,13 @@ function addXP(n) {
   showToast('+' + n + ' XP ⭐');
 }
 
-function updateApiStatus() {
-  const el = document.getElementById('apiStatusBadge');
-  if (!el) return;
-  if (API_KEY) {
-    el.className   = 'tag tag-green';
-    el.textContent = '✅ API Key Aktif';
-  } else {
-    el.className   = 'tag tag-red';
-    el.textContent = '❌ Belum ada API Key';
-  }
-}
-
 /* ============================================================
-   NAVIGATION
+   API KEY MODAL — tidak digunakan (key ada di api.php)
    ============================================================ */
+function saveApiKey()  { closeApiModal(); }
+function closeApiModal() {
+  document.getElementById('apiModal').classList.remove('show');
+}
 const PAGE_TITLES = {
   home:      '🏠 BERANDA',
   flashcard: '🃏 FLASH CARD',
@@ -156,38 +144,16 @@ function showToast(msg) {
 }
 
 /* ============================================================
-   API KEY MODAL
+   NAVIGATION
    ============================================================ */
-function saveApiKey() {
-  const k = document.getElementById('apiKeyInput').value.trim();
-  if (!k.startsWith('sk-ant')) {
-    alert('API key tidak valid. Harus diawali dengan "sk-ant-..."');
-    return;
-  }
-  API_KEY = k;
-  localStorage.setItem('ks_key', k);
-  closeApiModal();
-  updateApiStatus();
-  showToast('✅ API Key tersimpan!');
-}
-
-function closeApiModal() {
-  document.getElementById('apiModal').classList.remove('show');
-}
 
 /* ============================================================
-   CLAUDE API CALL  (via api.php)
+   CLAUDE API CALL  (via api.php — key ada di server)
    ============================================================ */
 async function callClaude(messages, system = '', maxTokens = 2000) {
-  if (!API_KEY) {
-    document.getElementById('apiModal').classList.add('show');
-    throw new Error('No API key');
-  }
-
   showLoad(true);
   try {
     const body = {
-      apiKey:     API_KEY,
       model:      'claude-sonnet-4-20250514',
       max_tokens: maxTokens,
       messages
@@ -1064,13 +1030,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Minta izin notifikasi untuk pomodoro
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
-  }
-
-  // Tampilkan API modal kalau belum ada key (delay 2 detik)
-  if (!API_KEY) {
-    setTimeout(() => {
-      document.getElementById('apiModal').classList.add('show');
-    }, 2000);
   }
 
   // Auto-resize textarea chat
