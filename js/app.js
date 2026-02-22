@@ -160,7 +160,7 @@ async function callClaude(messages, system = '', maxTokens = 2000) {
     };
     if (system) body.system = system;
 
-    const res = await fetch('api.php', {
+    const res = await fetch('/api/claude', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(body)
