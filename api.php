@@ -5,7 +5,7 @@
    ============================================================ */
 
 // ===== GANTI KEY DI SINI =====
-$API_KEY = 'sk-ant-api03-GANTI_DENGAN_KEY_BARU_KAMU';
+$API_KEY = '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';
 // ================================
 
 header('Content-Type: application/json');
