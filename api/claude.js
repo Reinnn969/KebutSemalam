@@ -4,7 +4,7 @@
    ============================================================ */
 
 // ===== GANTI KEY DI SINI =====
-const API_KEY = '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;
+const API_KEY = 'sk-ant-api03-JoqLWLJUvr8ouiyLGe1hhs7k4v2AEB-yCSTEqMhgyzon3kvP_2sIyiDs7MFpK3OMl';
 // ==============================
 
 module.exports = async function handler(req, res) {
