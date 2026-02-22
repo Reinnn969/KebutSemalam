@@ -4,7 +4,7 @@
    ============================================================ */
 
 // ===== GANTI KEY DI SINI =====
-const API_KEY = 'sk-ant-api03-JoqLWLJUvr8ouiyLGe1hhs7k4v2AEB-yCSTEqMhgyzon3kvP_2sIyiDs7MFpK3OMl';
+const API_KEY = 'sk-ant-api03-GANTI_DENGAN_KEY_BARU_KAMU';
 // ==============================
 
 module.exports = async function handler(req, res) {
