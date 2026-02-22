@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KebutSemalam — Belajar Kilat, Paham Beneran</title>
+  <link rel="icon" href="Logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- API KEY MODAL -->
+<div class="api-modal" id="apiModal">
+  <div class="api-box">
+    <div class="api-box-icon">🔑</div>
+    <h2>Masukkan API Key</h2>
+    <p>Untuk mengaktifkan fitur AI, masukkan Claude API Key kamu. Key disimpan aman di browser lokal kamu saja.</p>
+    <label class="lbl">Claude API Key</label>
+    <input type="password" id="apiKeyInput" class="mono-input" placeholder="sk-ant-api03-..." />
+    <div class="api-note">
+      Belum punya? Daftar gratis di
+      <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+      &rarr; API Keys &rarr; Create Key
+    </div>
+    <button class="btn btn-primary btn-full mt-18" onclick="saveApiKey()">Simpan &amp; Mulai ✓</button>
+    <button class="btn btn-outline btn-full mt-8"  onclick="closeApiModal()">Lewati untuk sekarang</button>
+  </div>
+</div>
+
+<!-- STICKER MODAL -->
+<div class="sticker-overlay" id="stickerOverlay" onclick="this.classList.remove('show')">
+  <div class="sticker-img-wrap" id="stickerImgWrap"></div>
+  <div class="sticker-msg"      id="stickerMsg"></div>
+  <div class="sticker-sub"      id="stickerSub"></div>
+  <div class="sticker-xp"       id="stickerXP"></div>
+  <div class="sticker-hint">Ketuk untuk tutup</div>
+</div>
+
+<!-- XP TOAST -->
+<div class="xp-toast" id="xpToast"></div>
+
+<!-- LOADING BAR -->
+<div class="load-bar" id="loadBar"></div>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-img">
+      <img src="Logo.png" alt="Logo" onerror="this.parentElement.innerHTML='&#128218;'" />
+    </div>
+    <div class="sb-logo-text">
+      KEBUTSEMALAM
+      <small>Belajar Kilat, Paham Beneran</small>
+    </div>
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-sec-title">Utama</div>
+    <div class="nav-item active" id="nav-home" onclick="goPage('home')">
+      <span class="nav-icon">&#127968;</span> Beranda
+    </div>
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-sec-title">Fitur AI</div>
+    <div class="nav-item" id="nav-flashcard" onclick="goPage('flashcard')">
+      <span class="nav-icon">&#127183;</span> Flash Card
+      <span class="nav-badge">AI</span>
+    </div>
+    <div class="nav-item" id="nav-feynman" onclick="goPage('feynman')">
+      <span class="nav-icon">&#129504;</span> Feynman Technique
+      <span class="nav-badge">AI</span>
+    </div>
+    <div class="nav-item" id="nav-soal" onclick="goPage('soal')">
+      <span class="nav-icon">&#128221;</span> Soal Bergradasi
+      <span class="nav-badge">AI</span>
+    </div>
+    <div class="nav-item" id="nav-rangkuman" onclick="goPage('rangkuman')">
+      <span class="nav-icon">&#128196;</span> Rangkuman Otomatis
+      <span class="nav-badge">AI</span>
+    </div>
+  </div>
+
+  <div class="sb-sec">
+    <div class="sb-sec-title">Tools</div>
+    <div class="nav-item" id="nav-pomodoro" onclick="goPage('pomodoro')">
+      <span class="nav-icon">&#9201;</span> Pomodoro Timer
+    </div>
+    <div class="nav-item" id="nav-jurnal" onclick="goPage('jurnal')">
+      <span class="nav-icon">&#128211;</span> Jurnal Belajar
+    </div>
+  </div>
+
+  <div class="sb-bottom">
+    <div class="xp-level">&#127942; Level <span id="sbLvl">1</span></div>
+    <div class="xp-labels">
+      <span id="sbXP">0 XP</span>
+      <span id="sbNext">100 XP</span>
+    </div>
+    <div class="xp-bg">
+      <div class="xp-fill" id="sbBar" style="width:0%"></div>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ===== TOPBAR ===== -->
+<header class="topbar">
+  <button class="hamburger" id="hamBtn" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="page-title-bar" id="pageTitle">&#127968; BERANDA</div>
+  <div class="topbar-right">
+    <div class="top-pill fire">&#128293; <span id="tStreak">1</span></div>
+    <div class="top-pill xp">&#11088; <span id="tXP">0</span></div>
+  </div>
+</header>
+
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+
+    <div class="hero">
+      <div class="hero-logo">
+        <img src="Logo.png" alt="Logo" onerror="this.parentElement.innerHTML='&#128218;'" />
+      </div>
+      <h1>KEBUTSEMALAM</h1>
+      <p>Platform belajar bertenaga AI untuk pelajar Indonesia.<br>Flashcard, Feynman, Soal Bergradasi, Rangkuman — semua dalam satu tempat!</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="v" id="h-xp">0</div><div class="l">Total XP</div></div>
+        <div class="hero-stat"><div class="v" id="h-streak">1</div><div class="l">Hari Streak</div></div>
+        <div class="hero-stat"><div class="v" id="h-sess">0</div><div class="l">Sesi Selesai</div></div>
+      </div>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-card" onclick="goPage('flashcard')">
+        <span class="feat-badge">AI</span>
+        <div class="feat-icon">&#127183;</div>
+        <div class="feat-name">FLASH CARD</div>
+        <div class="feat-desc">Input materi &rarr; AI buatkan kartu belajar interaktif. Jawab benar, dapat stiker lucu!</div>
+      </div>
+      <div class="feat-card" onclick="goPage('feynman')">
+        <span class="feat-badge">AI</span>
+        <div class="feat-icon">&#129504;</div>
+        <div class="feat-name">FEYNMAN</div>
+        <div class="feat-desc">Jelasin materi ke AI yang pura-pura polos. Cara terbaik buat beneran paham!</div>
+      </div>
+      <div class="feat-card" onclick="goPage('soal')">
+        <span class="feat-badge">AI</span>
+        <div class="feat-icon">&#128221;</div>
+        <div class="feat-name">SOAL BERGRADASI</div>
+        <div class="feat-desc">Latihan dari mudah &rarr; sedang &rarr; sulit. XP makin besar sesuai tingkat kesulitan!</div>
+      </div>
+      <div class="feat-card" onclick="goPage('rangkuman')">
+        <span class="feat-badge">AI</span>
+        <div class="feat-icon">&#128196;</div>
+        <div class="feat-name">RANGKUMAN</div>
+        <div class="feat-desc">Paste materi panjang &rarr; AI langsung buatkan ringkasan padat dan poin utama.</div>
+      </div>
+      <div class="feat-card" onclick="goPage('pomodoro')">
+        <div class="feat-icon">&#9201;</div>
+        <div class="feat-name">POMODORO</div>
+        <div class="feat-desc">25 menit fokus, 5 menit istirahat. Teknik produktivitas yang terbukti efektif!</div>
+      </div>
+      <div class="feat-card" onclick="goPage('jurnal')">
+        <div class="feat-icon">&#128211;</div>
+        <div class="feat-name">JURNAL BELAJAR</div>
+        <div class="feat-desc">Catat topik, mood, dan progress harian. Pantau perkembangan belajarmu!</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#9881; Status API Claude</div>
+      <p class="card-desc">Fitur AI membutuhkan Claude API Key dari Anthropic. Key tersimpan aman di browser kamu saja, tidak dikirim ke server lain.</p>
+      <div class="row-gap">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('apiModal').classList.add('show')">&#128273; Set API Key</button>
+        <span id="apiStatusBadge"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#128218; Cara Pakai</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div>
+            <div class="step-title">Daftar di Anthropic</div>
+            <div class="step-desc">Buka console.anthropic.com &rarr; buat akun gratis &rarr; buat API key.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div>
+            <div class="step-title">Masukkan API Key</div>
+            <div class="step-desc">Klik tombol "Set API Key" di atas, tempel key kamu, lalu simpan.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div>
+            <div class="step-title">Pilih Fitur &amp; Gas Belajar!</div>
+            <div class="step-desc">Buka sidebar lewat tombol garis tiga di pojok kiri atas, pilih fitur yang kamu mau.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- FLASHCARD -->
+  <section class="page" id="page-flashcard">
+    <div class="page-hdr">
+      <h1>&#127183; Flash Card</h1>
+      <p>Paste materi atau topik &rarr; AI buatkan kartu belajar interaktif. Flip kartu, jawab, dapat stiker!</p>
+    </div>
+    <div class="fc-wrap">
+      <div class="fc-left">
+        <div class="card">
+          <div class="card-title">&#9889; Generate Kartu</div>
+          <label class="lbl">Topik / Judul Set</label>
+          <input type="text" id="fc-topic" placeholder="Fotosintesis, Hukum Newton, Integral..." class="mb-11" />
+          <label class="lbl">Materi / Teks</label>
+          <textarea id="fc-mat" placeholder="Paste materi dari buku atau catatan kamu di sini..."></textarea>
+          <div class="grid-2 mt-12">
+            <div>
+              <label class="lbl">Jumlah Kartu</label>
+              <input type="number" id="fc-count" value="8" min="3" max="20" />
+            </div>
+            <div class="self-end">
+              <button class="btn btn-primary btn-full" onclick="genFlashcard()">&#10024; Generate</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="fc-list-card" style="display:none;">
+          <div class="card-title">&#128203; Semua Kartu</div>
+          <div class="fc-list-wrap" id="fc-list"></div>
+        </div>
+      </div>
+
+      <div class="fc-right">
+        <div class="empty" id="fc-empty">
+          <div class="empty-icon">&#127183;</div>
+          <p>Generate kartu dulu yuk!</p>
+        </div>
+        <div id="fc-active" style="display:none;">
+          <div class="fc-nav-row">
+            <span class="fc-counter-txt" id="fc-ctr">0 / 0</span>
+            <div class="row-gap">
+              <button class="btn btn-outline btn-sm" onclick="fcNav(-1)">&larr; Prev</button>
+              <button class="btn btn-outline btn-sm" onclick="fcNav(1)">Next &rarr;</button>
+            </div>
+          </div>
+          <div class="card-3d">
+            <div class="flashcard" id="fc-card" onclick="flipFC()">
+              <div class="fc-face front">
+                <div class="fc-label">&#10067; PERTANYAAN &bull; Klik untuk balik</div>
+                <div class="fc-text" id="fc-front">&#8212;</div>
+              </div>
+              <div class="fc-face back">
+                <div class="fc-label">&#9989; JAWABAN</div>
+                <div class="fc-text" id="fc-back">&#8212;</div>
+              </div>
+            </div>
+          </div>
+          <div id="fc-hint" class="fc-hint-row"><span>Klik kartu untuk lihat jawaban</span></div>
+          <div class="fc-ans-btns" id="fc-btns" style="display:none;">
+            <button class="btn btn-green btn-full" onclick="fcAns(true)">&#9989; Paham / Benar</button>
+            <button class="btn btn-red   btn-full" onclick="fcAns(false)">&#10060; Belum Paham</button>
+          </div>
+          <div class="card mt-12">
+            <div class="fc-score-grid">
+              <div><div class="fc-score-val green" id="fc-b">0</div><div class="fc-score-lbl">Benar</div></div>
+              <div><div class="fc-score-val red"   id="fc-s">0</div><div class="fc-score-lbl">Salah</div></div>
+              <div><div class="fc-score-val blue"  id="fc-r">0</div><div class="fc-score-lbl">Sisa</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- FEYNMAN -->
+  <section class="page" id="page-feynman">
+    <div class="page-hdr">
+      <h1>&#129504; Feynman Technique</h1>
+      <p>Jelasin materi ke AI yang pura-pura gak tau apa-apa. Kalau bisa jelasin dengan baik, berarti kamu beneran paham!</p>
+    </div>
+    <div class="card" id="fey-setup">
+      <div class="card-title">&#127919; Setup Sesi Feynman</div>
+      <label class="lbl">Topik yang Mau Dijelasin</label>
+      <input type="text" id="fey-topic" placeholder="Contoh: Fotosintesis, Integral, Revolusi Prancis..." class="mb-11" />
+      <label class="lbl">Tingkat Kesulitan AI</label>
+      <select id="fey-mode" class="mb-16">
+        <option value="easy">&#128522; Santai &mdash; AI tanya hal simpel dan dasar</option>
+        <option value="medium" selected>&#129300; Normal &mdash; AI cukup kritis dan penasaran</option>
+        <option value="hard">&#129488; Keras &mdash; AI minta penjelasan mendalam</option>
+      </select>
+      <div class="tip-box mb-16">
+        &#128161; <strong>Tips:</strong> Jelasin seperti ke teman yang baru pertama kali denger topik ini. Gunakan bahasa sesederhana mungkin. AI akan koreksi kalau ada yang salah!
+      </div>
+      <button class="btn btn-primary" onclick="startFey()">&#128640; Mulai Sesi</button>
+    </div>
+    <div id="fey-chat" style="display:none;">
+      <div class="feynman-bar">
+        <span class="bar-label">Topik:</span>
+        <span class="topic-chip" id="fey-topic-chip">&#8212;</span>
+        <div class="bar-right">
+          <div class="sess-dot"></div>
+          <span class="sess-active-lbl">Aktif</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="endFey()">&#127937; Akhiri Sesi</button>
+      </div>
+      <div class="chat-area" id="chat-msgs"></div>
+      <div class="chat-row">
+        <textarea id="chat-in" placeholder="Jelasin materinya di sini... (Enter = kirim, Shift+Enter = baris baru)" onkeydown="chatKey(event)"></textarea>
+        <button class="btn btn-primary" id="chat-btn" onclick="sendMsg()">&rarr;</button>
+      </div>
+      <div class="chat-note">Klik "Akhiri Sesi" kalau sudah selesai jelasin untuk mendapat feedback!</div>
+    </div>
+  </section>
+
+
+  <!-- SOAL BERGRADASI -->
+  <section class="page" id="page-soal">
+    <div class="page-hdr">
+      <h1>&#128221; Soal Bergradasi</h1>
+      <p>Mulai dari mudah &rarr; sedang &rarr; sulit. XP yang didapat makin besar sesuai tingkat kesulitan!</p>
+    </div>
+    <div class="card" id="soal-setup">
+      <div class="card-title">&#127919; Setup Latihan Soal</div>
+      <label class="lbl">Topik / Materi</label>
+      <textarea id="soal-mat" placeholder="Paste materi atau tulis topik di sini... Semakin detail, soal semakin relevan!" class="mb-11"></textarea>
+      <div class="grid-2 mb-16">
+        <div>
+          <label class="lbl">Soal per Tingkat</label>
+          <input type="number" id="soal-per" value="3" min="2" max="6" />
+        </div>
+        <div>
+          <label class="lbl">Mata Pelajaran</label>
+          <select id="soal-mapel">
+            <option>Umum</option><option>Matematika</option><option>IPA</option>
+            <option>IPS</option><option>B. Indonesia</option><option>B. Inggris</option>
+            <option>Sejarah</option><option>PKN</option><option>Kimia</option>
+            <option>Fisika</option><option>Biologi</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="genSoal()">&#9889; Generate Soal!</button>
+    </div>
+    <div id="soal-quiz" style="display:none;">
+      <div class="diff-tabs">
+        <div class="dtab mudah act" id="dtab-mudah" onclick="switchDiff('mudah')">&#128994; Mudah</div>
+        <div class="dtab sedang"   id="dtab-sedang" onclick="switchDiff('sedang')">&#128993; Sedang</div>
+        <div class="dtab sulit"    id="dtab-sulit"  onclick="switchDiff('sulit')">&#128308; Sulit</div>
+      </div>
+      <div class="card" id="soal-card">
+        <div class="soal-prog">
+          <span class="soal-ctr" id="soal-ctr">Soal 1 dari 3</span>
+          <div class="soal-dots" id="soal-dots"></div>
+          <span class="tag tag-green" id="soal-tag">&#128994; Mudah</span>
+        </div>
+        <div class="soal-q-box" id="soal-q">&#8212;</div>
+        <div class="soal-opts"  id="soal-opts"></div>
+        <div class="soal-fb"    id="soal-fb">
+          <div class="fbt" id="fb-t"></div>
+          <p id="fb-p"></p>
+        </div>
+        <div class="soal-action">
+          <button class="btn btn-primary" id="soal-nxt" onclick="nxtSoal()" style="display:none;">Lanjut &rarr;</button>
+        </div>
+      </div>
+      <div class="card soal-score-grid">
+        <div><div class="score-val green"  id="s-b">0</div><div class="score-lbl">Benar</div></div>
+        <div><div class="score-val red"    id="s-s">0</div><div class="score-lbl">Salah</div></div>
+        <div><div class="score-val yellow" id="s-x">0</div><div class="score-lbl">XP Sesi</div></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- RANGKUMAN -->
+  <section class="page" id="page-rangkuman">
+    <div class="page-hdr">
+      <h1>&#128196; Rangkuman Otomatis</h1>
+      <p>Paste materi panjang &rarr; AI buatkan ringkasan padat + poin penting + istilah kunci dalam hitungan detik.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128229; Input Materi</div>
+      <label class="lbl">Paste Materi di Sini</label>
+      <textarea id="rng-in" placeholder="Paste materi dari buku, catatan, atau internet... Minimal 3 paragraf untuk hasil terbaik!" style="min-height:200px;" class="mb-12"></textarea>
+      <div class="row-gap">
+        <button class="btn btn-primary" onclick="genRangkuman()">&#10024; Buat Rangkuman</button>
+        <button class="btn btn-outline" onclick="rngClear()">&#128465; Clear</button>
+      </div>
+    </div>
+    <div class="card" id="rng-out" style="display:none;">
+      <div class="rng-sec">
+        <h3 class="rng-sec-title">&#128204; Ringkasan Utama</h3>
+        <p id="rng-sum" class="rng-sum-text"></p>
+      </div>
+      <div class="rng-sec">
+        <h3 class="rng-sec-title">&#128273; Poin-Poin Penting</h3>
+        <div id="rng-pts"></div>
+      </div>
+      <div class="rng-sec">
+        <h3 class="rng-sec-title">&#128161; Istilah Kunci</h3>
+        <div id="rng-terms" class="terms-wrap"></div>
+      </div>
+      <button class="btn btn-outline btn-sm mt-8" onclick="rngCopy()">&#128203; Copy Rangkuman</button>
+    </div>
+  </section>
+
+
+  <!-- POMODORO -->
+  <section class="page" id="page-pomodoro">
+    <div class="page-hdr">
+      <h1>&#9201; Pomodoro Timer</h1>
+      <p>25 menit fokus total, istirahat 5 menit. Setelah 4 sesi, istirahat panjang 15 menit.</p>
+    </div>
+    <div class="pomo-wrap">
+      <div class="pomo-ring-cont">
+        <svg width="240" height="240" viewBox="0 0 240 240">
+          <circle class="ring-bg" cx="120" cy="120" r="100" />
+          <circle class="ring-fg" id="pomo-ring" cx="120" cy="120" r="100" />
+        </svg>
+        <div class="pomo-center">
+          <div class="pomo-time"     id="pomo-time">25:00</div>
+          <div class="pomo-mode-lbl" id="pomo-lbl">FOKUS</div>
+        </div>
+      </div>
+      <div class="pomo-btns">
+        <button class="btn btn-primary" id="pomo-pp"  onclick="pomoPP()">&#9654; Mulai</button>
+        <button class="btn btn-outline"               onclick="pomoRst()">&#8635; Reset</button>
+        <button class="btn btn-outline"               onclick="pomoSkip()">&#9197; Skip</button>
+      </div>
+      <div class="pomo-sess-row" id="pomo-sess-dots"></div>
+      <p class="pomo-sess-lbl" id="pomo-sess-lbl">Sesi ke-1 dari 4</p>
+      <div class="card mt-24">
+        <div class="card-title">&#9881; Pengaturan Timer</div>
+        <div class="grid-2 grid-gap-12">
+          <div><label class="lbl">Fokus (menit)</label><input type="number" id="p-work" value="25" min="1" max="99" onchange="pomoUpd()" /></div>
+          <div><label class="lbl">Istirahat Pendek</label><input type="number" id="p-brk"  value="5"  min="1" max="30" onchange="pomoUpd()" /></div>
+          <div><label class="lbl">Istirahat Panjang</label><input type="number" id="p-lng"  value="15" min="5" max="60" onchange="pomoUpd()" /></div>
+          <div><label class="lbl">Sesi per Putaran</label><input type="number" id="p-n"    value="4"  min="2" max="8"  onchange="pomoUpd()" /></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">&#128202; Statistik Hari Ini</div>
+        <div class="pomo-stats-grid">
+          <div><div class="score-val blue"   id="p-tot-s">0</div><div class="score-lbl">Sesi</div></div>
+          <div><div class="score-val green"  id="p-tot-m">0</div><div class="score-lbl">Menit</div></div>
+          <div><div class="score-val yellow" id="p-tot-x">0</div><div class="score-lbl">XP</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- JURNAL -->
+  <section class="page" id="page-jurnal">
+    <div class="page-hdr">
+      <h1>&#128211; Jurnal Belajar</h1>
+      <p>Catat apa yang kamu pelajari hari ini, mood, dan progress. Konsistensi adalah kunci keberhasilan!</p>
+    </div>
+    <div class="jurnal-grid">
+      <div class="card">
+        <div class="card-title">&#9999; Tulis Hari Ini</div>
+        <label class="lbl">Tanggal</label>
+        <input type="date" id="j-date" class="mb-11" />
+        <label class="lbl">Mood Belajar</label>
+        <div class="mood-row" id="mood-row">
+          <span class="mood-btn act" onclick="setMood(this,'&#128522;')">&#128522;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#128293;')">&#128293;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#128564;')">&#128564;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#128548;')">&#128548;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#129327;')">&#129327;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#128170;')">&#128170;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#128517;')">&#128517;</span>
+          <span class="mood-btn"     onclick="setMood(this,'&#128524;')">&#128524;</span>
+        </div>
+        <label class="lbl mt-11">Topik yang Dipelajari</label>
+        <input type="text" id="j-topik" placeholder="Fotosintesis, Integral..." class="mb-11" />
+        <label class="lbl">Catatan / Refleksi</label>
+        <textarea id="j-notes" placeholder="Apa yang kamu pelajari hari ini? Ada kesulitan? Pencapaian yang kamu bangga?" class="mb-11"></textarea>
+        <label class="lbl">Durasi Belajar (menit)</label>
+        <input type="number" id="j-dur" placeholder="60" class="mb-14" />
+        <button class="btn btn-primary btn-full" onclick="saveJurnal()">&#128190; Simpan Jurnal</button>
+      </div>
+      <div class="card">
+        <div class="card-title">&#128220; Riwayat Jurnal</div>
+        <div class="j-entries" id="j-list">
+          <div class="empty">
+            <div class="empty-icon">&#128449;</div>
+            <p>Belum ada jurnal. Mulai tulis!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>
